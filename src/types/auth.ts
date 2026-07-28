@@ -15,13 +15,16 @@ export interface RegisterRequest {
 export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
+  expiresIn?: number;
+  userInfo?: AuthUser;
 }
 
 /** 用户信息（认证相关） */
 export interface AuthUser {
   id: number;
   username: string;
-  email?: string;
+  nickname?: string;
   avatar?: string;
-  role: string;
+  status?: number;
+  createTime?: string;
 }

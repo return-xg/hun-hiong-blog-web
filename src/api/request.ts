@@ -11,6 +11,10 @@ const request: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  transformResponse: [(data: string) => {
+    // 将超过安全整数范围的数字转为字符串，避免精度丢失
+    return JSON.parse(data.replace(/:(\s*)(\d{16,})/g, ':$1"$2"'));
+  }],
 });
 
 // 是否正在刷新 Token

@@ -19,5 +19,5 @@ export function refreshToken(refreshToken: string): Promise<Result<TokenResponse
 
 /** 获取当前用户信息 */
 export function getCurrentUser(): Promise<Result<AuthUser>> {
-  return request.get('/auth/me');
+  return request.get('/auth/info');
 }

@@ -1,9 +1,9 @@
 /** 分类 */
 export interface Category {
-  id: number;
+  id: string;
   name: string;
+  slug?: string;
+  sort?: number;
   description?: string;
-  articleCount?: number;
-  createdAt: string;
-  updatedAt: string;
+  createTime: string;
 }
