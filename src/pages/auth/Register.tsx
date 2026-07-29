@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Space } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, IdcardOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '@/api/auth';
 import type { RegisterRequest } from '@/types/auth';
@@ -21,7 +21,7 @@ const Register: React.FC = () => {
       await register({
         username: values.username,
         password: values.password,
-        email: values.email,
+        nickname: values.nickname,
       });
 
       message.success('注册成功，请登录');
@@ -58,12 +58,12 @@ const Register: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-              name="email"
+              name="nickname"
               rules={[
-                { type: 'email', message: '请输入有效的邮箱地址' },
+                { max: 64, message: '昵称不超过 64 个字符' },
               ]}
             >
-              <Input prefix={<MailOutlined />} placeholder="邮箱（选填）" />
+              <Input prefix={<IdcardOutlined />} placeholder="昵称（选填）" />
             </Form.Item>
 
             <Form.Item

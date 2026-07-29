@@ -1,6 +1,6 @@
 /** 分类 */
 export interface Category {
-  id: string;
+  id: number;
   name: string;
   slug?: string;
   sort?: number;

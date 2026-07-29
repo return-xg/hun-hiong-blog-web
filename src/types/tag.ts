@@ -2,8 +2,6 @@
 export interface Tag {
   id: number;
   name: string;
-  color?: string;
-  articleCount?: number;
-  createdAt: string;
-  updatedAt: string;
+  slug?: string;
+  createTime: string;
 }

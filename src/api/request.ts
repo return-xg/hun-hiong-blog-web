@@ -5,6 +5,8 @@ import { storage } from '@/utils/storage';
 import { AUTH_REFRESH_URL } from '@/utils/constants';
 import type { Result } from '@/types/api';
 
+import type { LoginVO } from '@/types/auth';
+
 const request: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 15000,
@@ -81,14 +83,15 @@ request.interceptors.response.use(
       config._isRetry = true;
 
       try {
-        const refreshToken = storage.getRefreshToken();
-        if (!refreshToken) {
+        const refreshTk = storage.getRefreshToken();
+        if (!refreshTk) {
           throw new Error('No refresh token');
         }
 
-        const { data } = await axios.post<Result<{ accessToken: string; refreshToken: string }>>(
+        // 刷新 Token 接口改为 GET，通过 Authorization 头传递刷新令牌
+        const { data } = await axios.get<Result<LoginVO>>(
           `${request.defaults.baseURL}${AUTH_REFRESH_URL}`,
-          { refreshToken }
+          { headers: { Authorization: `Bearer ${refreshTk}` } }
         );
 
         const newAccessToken = data.data.accessToken;

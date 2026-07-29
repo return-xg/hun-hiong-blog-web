@@ -8,7 +8,10 @@ interface AuthState {
   isAuthenticated: boolean;
   setToken: (token: string | null) => void;
   setUser: (user: AuthUser | null) => void;
-  login: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+  /** 登录：存储 Token 并可选设置用户 */
+  login: (token: string, user?: AuthUser | null) => void;
+  /** 刷新 Token 后更新所有凭证 */
+  refreshAuth: (accessToken: string, refreshToken: string, user?: AuthUser | null) => void;
   logout: () => void;
 }
 
@@ -30,12 +33,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user });
   },
 
-  login: (accessToken, refreshTokenValue, user) => {
+  login: (token, user) => {
+    storage.setToken(token);
+    set({
+      token,
+      user: user ?? null,
+      isAuthenticated: true,
+    });
+  },
+
+  refreshAuth: (accessToken, refreshTokenValue, user) => {
     storage.setToken(accessToken);
     storage.setRefreshToken(refreshTokenValue);
     set({
       token: accessToken,
-      user,
+      user: user ?? null,
       isAuthenticated: true,
     });
   },

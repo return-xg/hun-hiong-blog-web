@@ -15,3 +15,107 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* 富文本文章内容样式 */
+.article-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-color, #333);
+  word-break: break-word;
+}
+
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 12px 0;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6 {
+  margin: 24px 0 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.article-content p {
+  margin: 12px 0;
+}
+
+.article-content blockquote {
+  margin: 16px 0;
+  padding: 12px 20px;
+  border-left: 4px solid var(--primary-color, #1677ff);
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 0 6px 6px 0;
+}
+
+.article-content pre {
+  margin: 16px 0;
+  padding: 16px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.article-content code {
+  padding: 2px 6px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.article-content pre code {
+  padding: 0;
+  background: none;
+}
+
+.article-content ul,
+.article-content ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.article-content li {
+  margin: 4px 0;
+}
+
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.article-content table th,
+.article-content table td {
+  padding: 10px 14px;
+  border: 1px solid #e8e8e8;
+  text-align: left;
+}
+
+.article-content table th {
+  background: var(--bg-secondary, #f5f5f5);
+  font-weight: 600;
+}
+
+.article-content a {
+  color: var(--primary-color, #1677ff);
+  text-decoration: none;
+}
+
+.article-content a:hover {
+  text-decoration: underline;
+}
+
+.article-content hr {
+  margin: 24px 0;
+  border: none;
+  border-top: 1px solid #e8e8e8;
+}

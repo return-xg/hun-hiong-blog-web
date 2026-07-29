@@ -12,3 +12,15 @@ export const ADMIN_PATH_PREFIX = '/admin';
 
 /** 默认分页大小 */
 export const DEFAULT_PAGE_SIZE = 10;
+
+/** 文章状态 */
+export const ARTICLE_STATUS = {
+  DRAFT: 0,
+  PUBLISHED: 1,
+} as const;
+
+/** 文章状态文本映射 */
+export const ARTICLE_STATUS_MAP: Record<number, string> = {
+  [ARTICLE_STATUS.DRAFT]: '草稿',
+  [ARTICLE_STATUS.PUBLISHED]: '已发布',
+};

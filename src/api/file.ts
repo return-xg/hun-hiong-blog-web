@@ -6,7 +6,7 @@ import type { FileUploadResponse } from '@/types/file';
 export function uploadFile(file: File): Promise<Result<FileUploadResponse>> {
   const formData = new FormData();
   formData.append('file', file);
-  return request.post('/files/upload', formData, {
+  return request.post('/file/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }

@@ -8,7 +8,7 @@ export function getCategoryList(params?: { current?: number; size?: number }): P
 }
 
 /** 获取分类详情 */
-export function getCategoryDetail(id: string): Promise<Result<Category>> {
+export function getCategoryDetail(id: number): Promise<Result<Category>> {
   return request.get(`/category/${id}`);
 }
 
@@ -18,11 +18,11 @@ export function createCategory(data: Partial<Category>): Promise<Result<void>> {
 }
 
 /** 更新分类 */
-export function updateCategory(id: string, data: Partial<Category>): Promise<Result<void>> {
+export function updateCategory(id: number, data: Partial<Category>): Promise<Result<void>> {
   return request.put(`/category/${id}`, data);
 }
 
 /** 删除分类（批量） */
-export function deleteCategory(ids: string[]): Promise<Result<void>> {
+export function deleteCategory(ids: number[]): Promise<Result<void>> {
   return request.delete('/category/batch', { data: ids });
 }

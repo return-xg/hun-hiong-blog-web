@@ -4,26 +4,26 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { login, getCurrentUser } from '@/api/auth';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { LoginRequest } from '@/types/auth';
+import type { LoginRequest, LoginVO } from '@/types/auth';
 
 const { Title } = Typography;
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login: storeLogin } = useAuthStore();
 
   const onFinish = async (values: LoginRequest) => {
     setLoading(true);
     try {
-      const { data } = await login(values) as any;
-      const { accessToken, refreshToken } = data;
+      // 登录接口返回 LoginVO（包含 accessToken 和 refreshToken）
+      const res = await login(values);
+      const { accessToken, refreshToken } = res.data as LoginVO;
 
-      // 先将 token 存入 storage，以便后续请求携带
-      storeLogin(accessToken, refreshToken, null as any);
+      // 存储双 Token，以便后续请求携带
+      useAuthStore.getState().refreshAuth(accessToken, refreshToken, null);
 
       // 获取当前用户信息
-      const userRes = await getCurrentUser() as any;
+      const userRes = await getCurrentUser();
       const user = userRes.data;
 
       // 更新 Store 中的用户信息

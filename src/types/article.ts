@@ -4,16 +4,18 @@ import type { Tag } from './tag';
 export interface Article {
   id: number;
   title: string;
-  content: string;
+  content?: string;
   summary?: string;
-  coverImage?: string;
+  coverUrl?: string;
   categoryId?: number;
   categoryName?: string;
   tags?: Tag[];
+  /** 状态：0-草稿，1-已发布 */
   status: number;
   viewCount: number;
-  createdAt: string;
-  updatedAt: string;
+  likeCount: number;
+  createTime: string;
+  updateTime: string;
 }
 
 /** 文章查询参数 */

@@ -8,15 +8,18 @@ export interface LoginRequest {
 export interface RegisterRequest {
   username: string;
   password: string;
-  email?: string;
+  nickname?: string;
 }
 
-/** Token 响应 */
-export interface TokenResponse {
+/** 登录/注册响应（返回 Token 字符串） */
+export type TokenResponse = string;
+
+/** 刷新 Token 响应 */
+export interface LoginVO {
   accessToken: string;
   refreshToken: string;
-  expiresIn?: number;
-  userInfo?: AuthUser;
+  expiresIn: number;
+  userInfo: AuthUser;
 }
 
 /** 用户信息（认证相关） */
