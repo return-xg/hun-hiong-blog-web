@@ -7,6 +7,7 @@ import { getArticleList } from '@/api/article';
 import { getAllTags } from '@/api/tag';
 import type { Article } from '@/types/article';
 import type { Tag as TagType } from '@/types/tag';
+import { ARTICLE_STATUS } from '@/utils/constants';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -36,7 +37,7 @@ const TagPage: React.FC = () => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    getArticleList({ current, size: PAGE_SIZE, tagId: Number(id) })
+    getArticleList({ current, size: PAGE_SIZE, tagId: id, status: ARTICLE_STATUS.PUBLISHED })
       .then((res) => {
         const data = (res as any).data;
         setArticles(data.records);

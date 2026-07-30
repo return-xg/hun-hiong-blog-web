@@ -17,7 +17,7 @@ const ArticleDetail: React.FC = () => {
   useEffect(() => {
     if (id) {
       setLoading(true);
-      getArticleDetail(Number(id))
+      getArticleDetail(id)
         .then((res) => {
           setArticle((res as any).data);
         })

@@ -2,12 +2,12 @@ import type { Tag } from './tag';
 
 /** 文章 */
 export interface Article {
-  id: number;
+  id: string;
   title: string;
   content?: string;
   summary?: string;
   coverUrl?: string;
-  categoryId?: number;
+  categoryId?: string;
   categoryName?: string;
   tags?: Tag[];
   /** 状态：0-草稿，1-已发布 */
@@ -23,7 +23,7 @@ export interface ArticleQuery {
   current?: number;
   size?: number;
   title?: string;
-  categoryId?: number;
-  tagId?: number;
+  categoryId?: string | number;
+  tagId?: string | number;
   status?: number;
 }

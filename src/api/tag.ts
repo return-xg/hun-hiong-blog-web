@@ -18,16 +18,16 @@ export function createTag(data: Partial<Tag>): Promise<Result<void>> {
 }
 
 /** 更新标签 */
-export function updateTag(id: number, data: Partial<Tag>): Promise<Result<void>> {
+export function updateTag(id: string | number, data: Partial<Tag>): Promise<Result<void>> {
   return request.put(`/tag/${id}`, data);
 }
 
 /** 删除标签 */
-export function deleteTag(id: number): Promise<Result<void>> {
+export function deleteTag(id: string | number): Promise<Result<void>> {
   return request.delete(`/tag/${id}`);
 }
 
 /** 批量删除标签 */
-export function batchDeleteTags(ids: number[]): Promise<Result<void>> {
+export function batchDeleteTags(ids: (string | number)[]): Promise<Result<void>> {
   return request.delete('/tag/batch', { data: ids });
 }

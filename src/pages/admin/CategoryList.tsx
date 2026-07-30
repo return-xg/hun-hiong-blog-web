@@ -71,14 +71,14 @@ const CategoryList: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     await deleteCategory([id]);
     message.success('删除成功');
     fetchList(pagination.current, pagination.pageSize);
   };
 
   const handleBatchDelete = async () => {
-    await deleteCategory(selectedRowKeys as number[]);
+    await deleteCategory(selectedRowKeys as string[]);
     message.success('批量删除成功');
     setSelectedRowKeys([]);
     fetchList(pagination.current, pagination.pageSize);

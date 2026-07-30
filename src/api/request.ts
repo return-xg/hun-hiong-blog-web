@@ -7,6 +7,66 @@ import type { Result } from '@/types/api';
 
 import type { LoginVO } from '@/types/auth';
 
+/**
+ * 安全解析 JSON，将超出 JS 安全整数范围（>15 位）的数字转为字符串
+ * 通过跟踪字符串上下文，确保不会误改字符串值中的数字
+ */
+function safeJsonParse(text: string): unknown {
+  let result = '';
+  let inString = false;
+  let i = 0;
+
+  while (i < text.length) {
+    const ch = text[i];
+
+    if (inString) {
+      result += ch;
+      if (ch === '\\') {
+        // 转义字符，直接追加下一个字符
+        i++;
+        if (i < text.length) {
+          result += text[i];
+        }
+      } else if (ch === '"') {
+        inString = false;
+      }
+      i++;
+      continue;
+    }
+
+    // 不在字符串内
+    if (ch === '"') {
+      inString = true;
+      result += ch;
+      i++;
+      continue;
+    }
+
+    // 检测数字：JSON 数字以 - 或 0-9 开头
+    if (ch === '-' || (ch >= '0' && ch <= '9')) {
+      const start = i;
+      while (i < text.length && text[i] !== ',' && text[i] !== '}' && text[i] !== ']' && text[i] !== ' ' && text[i] !== '\n' && text[i] !== '\r' && text[i] !== '\t') {
+        i++;
+      }
+      const numStr = text.substring(start, i);
+      // 统计纯数字位数（不含负号和小数点）
+      const digitCount = numStr.replace(/[-.]/g, '').length;
+      if (digitCount > 15) {
+        // 超过安全整数范围，转为字符串
+        result += `"${numStr}"`;
+      } else {
+        result += numStr;
+      }
+      continue;
+    }
+
+    result += ch;
+    i++;
+  }
+
+  return JSON.parse(result);
+}
+
 const request: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 15000,
@@ -14,8 +74,7 @@ const request: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   transformResponse: [(data: string) => {
-    // 将超过安全整数范围的数字转为字符串，避免精度丢失
-    return JSON.parse(data.replace(/:(\s*)(\d{16,})/g, ':$1"$2"'));
+    return safeJsonParse(data);
   }],
 });
 
@@ -59,8 +118,8 @@ request.interceptors.response.use(
   async (error) => {
     const { response, config } = error;
 
-    // 401 未授权，尝试刷新 Token
-    if (response?.status === 401 && !config._isRetry) {
+    // 401 未授权 或 403 Token 过期，尝试刷新 Token
+    if ((response?.status === 401 || response?.status === 403) && !config._isRetry) {
       // 如果是刷新 Token 的请求本身失败了，跳转登录页
       if (config.url === AUTH_REFRESH_URL) {
         storage.clear();

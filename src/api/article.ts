@@ -28,7 +28,7 @@ export function deleteArticle(id: string | number): Promise<Result<void>> {
 }
 
 /** 批量删除文章 */
-export function batchDeleteArticles(ids: number[]): Promise<Result<void>> {
+export function batchDeleteArticles(ids: (string | number)[]): Promise<Result<void>> {
   return request.delete('/article/batch', { data: ids });
 }
 

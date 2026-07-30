@@ -95,7 +95,7 @@ const TagList: React.FC = () => {
   };
 
   /** 删除单个标签 */
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     await deleteTag(id);
     message.success('删除成功');
     fetchList(pagination.current, pagination.pageSize, searchName);
@@ -103,7 +103,7 @@ const TagList: React.FC = () => {
 
   /** 批量删除标签 */
   const handleBatchDelete = async () => {
-    await batchDeleteTags(selectedRowKeys as number[]);
+    await batchDeleteTags(selectedRowKeys as string[]);
     message.success('批量删除成功');
     setSelectedRowKeys([]);
     fetchList(pagination.current, pagination.pageSize, searchName);

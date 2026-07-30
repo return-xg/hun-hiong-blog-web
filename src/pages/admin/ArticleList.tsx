@@ -113,7 +113,7 @@ const ArticleList: React.FC = () => {
 
   /** 批量删除 */
   const handleBatchDelete = async () => {
-    await batchDeleteArticles(selectedRowKeys as number[]);
+    await batchDeleteArticles(selectedRowKeys as string[]);
     message.success('批量删除成功');
     setSelectedRowKeys([]);
     fetchList(pagination.current, pagination.pageSize);
