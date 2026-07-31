@@ -7,7 +7,7 @@ import { getArticleList } from '@/api/article';
 import { getAllTags } from '@/api/tag';
 import type { Article } from '@/types/article';
 import type { Tag as TagType } from '@/types/tag';
-import { ARTICLE_STATUS } from '@/utils/constants';
+import { ARTICLE_STATUS, getFileUrl } from '@/utils/constants';
 import { viewCountTracker } from '@/utils/storage';
 
 const { Title, Text, Paragraph } = Typography;
@@ -121,6 +121,9 @@ const TagPage: React.FC = () => {
                   border: '1px solid var(--border-light)',
                   boxShadow: 'var(--shadow-sm)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  display: 'flex',
+                  gap: 24,
+                  alignItems: article.coverUrl ? 'center' : 'stretch',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)';
@@ -133,66 +136,88 @@ const TagPage: React.FC = () => {
                   e.currentTarget.style.borderColor = 'var(--border-light)';
                 }}
               >
-                <Title
-                  level={4}
-                  style={{
-                    marginBottom: 10,
-                    fontFamily: 'var(--font-serif)',
-                    color: 'var(--text-color)',
-                  }}
-                >
-                  {article.title}
-                </Title>
+                {/* 文字内容 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Title
+                    level={4}
+                    style={{
+                      marginBottom: 10,
+                      fontFamily: 'var(--font-serif)',
+                      color: 'var(--text-color)',
+                    }}
+                  >
+                    {article.title}
+                  </Title>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 16,
-                    marginBottom: 10,
-                    fontSize: 13,
-                    color: 'var(--text-light)',
-                  }}
-                >
-                  {article.categoryName && <span>{article.categoryName}</span>}
-                  <span>
-                    <ClockCircleOutlined style={{ marginRight: 4 }} />
-                    {article.createTime}
-                  </span>
-                  <span>
-                    <EyeOutlined style={{ marginRight: 4 }} />
-                    {article.viewCount}
-                  </span>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                      marginBottom: 10,
+                      fontSize: 13,
+                      color: 'var(--text-light)',
+                    }}
+                  >
+                    {article.categoryName && <span>{article.categoryName}</span>}
+                    <span>
+                      <ClockCircleOutlined style={{ marginRight: 4 }} />
+                      {article.createTime}
+                    </span>
+                    <span>
+                      <EyeOutlined style={{ marginRight: 4 }} />
+                      {article.viewCount}
+                    </span>
+                  </div>
+
+                  {article.tags && article.tags.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      {article.tags.map((tag) => (
+                        <Tag
+                          key={tag.id}
+                          style={{
+                            marginBottom: 4,
+                            cursor: 'pointer',
+                            background: String(tag.id) === id ? 'var(--primary-color)' : 'var(--tag-bg)',
+                            color: String(tag.id) === id ? '#fff' : 'var(--tag-text)',
+                            border: 'none',
+                            borderRadius: 'var(--radius-tag)',
+                            fontSize: 12,
+                          }}
+                        >
+                          {tag.name}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+
+                  {article.summary && (
+                    <Paragraph
+                      style={{ color: 'var(--text-secondary)', marginBottom: 0, fontSize: 14, lineHeight: 1.7 }}
+                      ellipsis={{ rows: 2 }}
+                    >
+                      {article.summary}
+                    </Paragraph>
+                  )}
                 </div>
 
-                {article.tags && article.tags.length > 0 && (
-                  <div style={{ marginBottom: 8 }}>
-                    {article.tags.map((tag) => (
-                      <Tag
-                        key={tag.id}
-                        style={{
-                          marginBottom: 4,
-                          cursor: 'pointer',
-                          background: String(tag.id) === id ? 'var(--primary-color)' : 'var(--tag-bg)',
-                          color: String(tag.id) === id ? '#fff' : 'var(--tag-text)',
-                          border: 'none',
-                          borderRadius: 'var(--radius-tag)',
-                          fontSize: 12,
-                        }}
-                      >
-                        {tag.name}
-                      </Tag>
-                    ))}
-                  </div>
-                )}
-
-                {article.summary && (
-                  <Paragraph
-                    style={{ color: 'var(--text-secondary)', marginBottom: 0, fontSize: 14, lineHeight: 1.7 }}
-                    ellipsis={{ rows: 2 }}
+                {/* 封面图 */}
+                {article.coverUrl && (
+                  <div
+                    style={{
+                      flexShrink: 0,
+                      width: 180,
+                      height: 130,
+                      borderRadius: 'var(--radius-sm)',
+                      overflow: 'hidden',
+                    }}
                   >
-                    {article.summary}
-                  </Paragraph>
+                    <img
+                      src={getFileUrl(article.coverUrl)}
+                      alt={article.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
                 )}
               </article>
             </Link>

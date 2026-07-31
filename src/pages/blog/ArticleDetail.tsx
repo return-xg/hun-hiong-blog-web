@@ -1,19 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { Typography, Tag, Divider, Spin } from 'antd';
-import { EyeOutlined, ClockCircleOutlined, FolderOutlined } from '@ant-design/icons';
+import { EyeOutlined, ClockCircleOutlined, FolderOutlined, SwapOutlined } from '@ant-design/icons';
 
-import { getArticleDetail, incrementArticleView } from '@/api/article';
+import { getArticleList, getArticleDetail, incrementArticleView } from '@/api/article';
 import type { Article } from '@/types/article';
-import { ARTICLE_STATUS_MAP, getFileUrl } from '@/utils/constants';
+import { ARTICLE_STATUS, ARTICLE_STATUS_MAP, getFileUrl } from '@/utils/constants';
 import { viewCountTracker } from '@/utils/storage';
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
+
+/** 推荐文章数量 */
+const RECOMMEND_COUNT = 3;
+
+/** 从数组中随机抽取指定数量的元素 */
+function pickRandom<T>(items: T[], count: number): T[] {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, count);
+}
 
 const ArticleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recommendArticles, setRecommendArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -36,6 +50,55 @@ const ArticleDetail: React.FC = () => {
         setLoading(false);
       });
   }, [id]);
+
+  /** 加载推荐文章：优先同分类，不足时用其他文章补齐 */
+  const loadRecommendArticles = (currentArticle: Article) => {
+    const categoryId = currentArticle.categoryId;
+
+    // 先获取同分类下的文章
+    const sameCategoryPromise = categoryId
+      ? getArticleList({ current: 1, size: 50, categoryId, status: ARTICLE_STATUS.PUBLISHED })
+      : Promise.resolve(null);
+
+    Promise.all([
+      sameCategoryPromise,
+      getArticleList({ current: 1, size: 50, status: ARTICLE_STATUS.PUBLISHED }),
+    ])
+      .then(([sameCatRes, allRes]) => {
+        const sameCatRecords = ((sameCatRes as any)?.data?.records ?? []) as Article[];
+        const allRecords = ((allRes as any)?.data?.records ?? []) as Article[];
+
+        // 排除当前文章
+        const sameCatCandidates = sameCatRecords.filter((a) => String(a.id) !== id);
+        const otherCandidates = allRecords.filter(
+          (a) => String(a.id) !== id && String(a.categoryId) !== String(categoryId),
+        );
+
+        // 优先从同分类中抽取，不足的部分用其他文章补齐
+        const sameCatPicked = pickRandom(sameCatCandidates, RECOMMEND_COUNT);
+        const remaining = RECOMMEND_COUNT - sameCatPicked.length;
+        const otherPicked = remaining > 0 ? pickRandom(otherCandidates, remaining) : [];
+
+        setRecommendArticles(viewCountTracker.mergeInto([...sameCatPicked, ...otherPicked]));
+      })
+      .catch(() => {
+        // 推荐文章加载失败不影响页面展示
+      });
+  };
+
+  /** 文章加载完成后加载推荐 */
+  useEffect(() => {
+    if (article) {
+      loadRecommendArticles(article);
+    }
+  }, [article?.id]);
+
+  /** 换一批推荐 */
+  const handleRefreshRecommend = () => {
+    if (article) {
+      loadRecommendArticles(article);
+    }
+  };
 
   if (loading) {
     return (
@@ -176,6 +239,92 @@ const ArticleDetail: React.FC = () => {
         className="article-content"
         dangerouslySetInnerHTML={{ __html: article.content || '' }}
       />
+
+      {/* 推荐阅读 — 轻量链接列表，与首页卡片布局区分 */}
+      {recommendArticles.length > 0 && (
+        <>
+          <Divider style={{ borderColor: 'var(--border-light)', margin: '40px 0 20px' }} />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 16,
+            }}
+          >
+            <Title
+              level={5}
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-serif)',
+                color: 'var(--text-secondary)',
+                fontWeight: 500,
+              }}
+            >
+              推荐阅读
+            </Title>
+            <Text
+              style={{
+                fontSize: 12,
+                color: 'var(--primary-color)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 3,
+              }}
+              onClick={handleRefreshRecommend}
+            >
+              <SwapOutlined /> 换一批
+            </Text>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {recommendArticles.map((item, index) => (
+              <Link
+                key={item.id}
+                to={`/article/${item.id}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '10px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  textDecoration: 'none',
+                  transition: 'background 0.2s',
+                  borderBottom: index < recommendArticles.length - 1 ? '1px solid var(--border-light)' : 'none',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--bg-component)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 1,
+                    color: 'var(--text-color)',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                  }}
+                  ellipsis
+                >
+                  {item.title}
+                </Text>
+                <Text
+                  style={{
+                    flexShrink: 0,
+                    color: 'var(--text-light)',
+                    fontSize: 12,
+                  }}
+                >
+                  {item.createTime}
+                </Text>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
