@@ -116,7 +116,9 @@ const ArticleEdit: React.FC = () => {
       setContentReady(true);
       if (data.coverUrl) {
         setCoverUrl(data.coverUrl);
-        setFileList([{ uid: '-1', name: 'cover', url: data.coverUrl, status: 'done' }]);
+        // 后端返回的是相对路径，需要拼接后端基础地址才能正确渲染图片预览
+        const fullCoverUrl = data.coverUrl.startsWith('http') ? data.coverUrl : `${API_BASE_URL}${data.coverUrl}`;
+        setFileList([{ uid: '-1', name: 'cover', url: fullCoverUrl, status: 'done' }]);
       }
     } finally {
       setLoading(false);
