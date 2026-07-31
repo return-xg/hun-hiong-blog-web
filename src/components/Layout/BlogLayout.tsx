@@ -10,6 +10,10 @@ import {
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useAppStore } from '@/store/useAppStore';
+import { USER_ROLE } from '@/utils/constants';
+import LoginModal from '@/components/LoginModal';
+import RegisterModal from '@/components/RegisterModal';
 
 const { Header, Content, Footer } = Layout;
 
@@ -21,6 +25,7 @@ const menuItems = [
 const BlogLayout: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { openLoginModal } = useAppStore();
 
   /** 退出登录 */
   const handleLogout = () => {
@@ -30,13 +35,18 @@ const BlogLayout: React.FC = () => {
 
   /** 已登录时的下拉菜单 */
   const userMenuItems: MenuProps['items'] = [
-    {
-      key: 'admin',
-      icon: <SettingOutlined />,
-      label: '后台管理',
-      onClick: () => navigate('/admin'),
-    },
-    { type: 'divider' },
+    // 只有管理员才显示后台管理入口
+    ...(user?.role === USER_ROLE.ADMIN
+      ? [
+          {
+            key: 'admin',
+            icon: <SettingOutlined />,
+            label: '后台管理',
+            onClick: () => navigate('/admin'),
+          },
+          { type: 'divider' as const },
+        ]
+      : []),
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -88,7 +98,7 @@ const BlogLayout: React.FC = () => {
             <Button
               type="primary"
               icon={<LoginOutlined />}
-              onClick={() => navigate('/login')}
+              onClick={openLoginModal}
             >
               登录
             </Button>
@@ -101,6 +111,10 @@ const BlogLayout: React.FC = () => {
       <Footer style={{ textAlign: 'center', background: '#fafafa' }}>
         Hun Hiong Blog ©{new Date().getFullYear()}
       </Footer>
+
+      {/* 登录/注册弹窗 */}
+      <LoginModal />
+      <RegisterModal />
     </Layout>
   );
 };

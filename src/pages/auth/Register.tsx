@@ -25,7 +25,7 @@ const Register: React.FC = () => {
       });
 
       message.success('注册成功，请登录');
-      navigate('/login');
+      navigate('/');
     } catch {
       // 错误已在 request 拦截器中统一处理
     } finally {
@@ -100,8 +100,9 @@ const Register: React.FC = () => {
               </Button>
             </Form.Item>
 
-            <div style={{ textAlign: 'center' }}>
-              已有账号？ <Link to="/login">去登录</Link>
+            <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 16 }}>
+              <Link to="/">返回首页</Link>
+              <span>已有账号？ <Link to="/">去登录</Link></span>
             </div>
           </Form>
         </Space>

@@ -9,6 +9,7 @@ import {
   TagsOutlined,
   UserOutlined,
   LogoutOutlined,
+  HomeOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -36,7 +37,7 @@ const AdminLayout: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -78,9 +79,14 @@ const AdminLayout: React.FC = () => {
             icon={sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={toggleSidebar}
           />
-          <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
-            退出登录
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Button type="text" icon={<HomeOutlined />} onClick={() => navigate('/')}>
+              返回博客
+            </Button>
+            <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
+              退出登录
+            </Button>
+          </div>
         </Header>
         <Content
           style={{

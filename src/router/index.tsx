@@ -4,8 +4,6 @@ import BlogLayout from '@/components/Layout/BlogLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // 页面组件
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
 import Dashboard from '@/pages/admin/Dashboard';
 import ArticleList from '@/pages/admin/ArticleList';
 import ArticleEdit from '@/pages/admin/ArticleEdit';
@@ -31,9 +29,9 @@ const router = createBrowserRouter([
       { path: 'about', element: <About /> },
     ],
   },
-  // 认证路由
-  { path: '/login', element: <Login /> },
-  { path: '/register', element: <Register /> },
+  // 认证路由（登录/注册已改为弹窗形式，重定向到首页）
+  { path: '/login', element: <Navigate to="/" replace /> },
+  { path: '/register', element: <Navigate to="/" replace /> },
   // 后台管理路由
   {
     path: '/admin',
