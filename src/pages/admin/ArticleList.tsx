@@ -25,6 +25,7 @@ import { getCategoryList } from '@/api/category';
 import type { Article } from '@/types/article';
 import type { Category } from '@/types/category';
 import { ARTICLE_STATUS, ARTICLE_STATUS_MAP, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { viewCountTracker } from '@/utils/storage';
 
 const { Title } = Typography;
 
@@ -62,7 +63,9 @@ const ArticleList: React.FC = () => {
         status: filterStatus,
       });
       const data = (res as any).data;
-      setArticles(data.records);
+      const records: Article[] = data.records;
+      // 合并本地未同步的阅读量增量
+      setArticles(viewCountTracker.mergeInto(records));
       setPagination({
         current: data.current,
         pageSize: data.size,

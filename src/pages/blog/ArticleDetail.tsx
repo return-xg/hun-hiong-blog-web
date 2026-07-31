@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom';
 import { Typography, Tag, Divider, Spin, Space } from 'antd';
 import { EyeOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
-import { getArticleDetail } from '@/api/article';
+import { getArticleDetail, incrementArticleView } from '@/api/article';
 import type { Article } from '@/types/article';
 import { ARTICLE_STATUS_MAP } from '@/utils/constants';
+import { viewCountTracker } from '@/utils/storage';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -15,16 +16,28 @@ const ArticleDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      getArticleDetail(id)
-        .then((res) => {
-          setArticle((res as any).data);
-        })
-        .finally(() => {
-          setLoading(false);
+    if (!id) return;
+
+    setLoading(true);
+    getArticleDetail(id)
+      .then((res) => {
+        const articleData = (res as any).data as Article;
+        // 合并本地未同步的阅读量增量（弥合后端 5 分钟批量同步延迟）
+        const [merged] = viewCountTracker.mergeInto([articleData]);
+        setArticle(merged);
+
+        // 每次进入页面调用一次，阅读量 +1
+        incrementArticleView(id).then(() => {
+          const dbViewCount = articleData.viewCount ?? 0;
+          viewCountTracker.recordIncrement(id, dbViewCount);
+          // 重新合并以展示最新的本地增量
+          const [updated] = viewCountTracker.mergeInto([articleData]);
+          setArticle(updated);
         });
-    }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id]);
 
   if (loading) {

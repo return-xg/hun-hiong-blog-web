@@ -2,10 +2,22 @@ import axios from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { message } from 'antd';
 import { storage } from '@/utils/storage';
-import { AUTH_REFRESH_URL } from '@/utils/constants';
+import { AUTH_REFRESH_URL, ADMIN_PATH_PREFIX } from '@/utils/constants';
 import type { Result } from '@/types/api';
 
 import type { LoginVO } from '@/types/auth';
+
+/** 扩展 Axios 请求配置，支持自定义标记 */
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    /** 是否正在刷新 Token */
+    _isRetry?: boolean;
+    /** 是否已尝试过无 Token 重试 */
+    _isRetryWithoutToken?: boolean;
+    /** 跳过 Token 注入（用于公开接口重试） */
+    _skipAuth?: boolean;
+  }
+}
 
 /**
  * 安全解析 JSON，将超出 JS 安全整数范围（>15 位）的数字转为字符串
@@ -86,6 +98,8 @@ let requestQueue: Array<(token: string) => void> = [];
 // 请求拦截器
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 标记了 _skipAuth 的请求不注入 Token（用于公开接口重试）
+    if (config._skipAuth) return config;
     const token = storage.getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -118,12 +132,23 @@ request.interceptors.response.use(
   async (error) => {
     const { response, config } = error;
 
+    /**
+     * 清除认证状态并根据当前路径决定是否跳转登录页
+     * 只有后台管理页面才跳转登录，公开博客页面只清除状态
+     */
+    const clearAuthAndRedirect = () => {
+      storage.clear();
+      const isAdminPage = window.location.pathname.startsWith(ADMIN_PATH_PREFIX);
+      if (isAdminPage) {
+        window.location.href = '/login';
+      }
+    };
+
     // 401 未授权 或 403 Token 过期，尝试刷新 Token
     if ((response?.status === 401 || response?.status === 403) && !config._isRetry) {
-      // 如果是刷新 Token 的请求本身失败了，跳转登录页
-      if (config.url === AUTH_REFRESH_URL) {
-        storage.clear();
-        window.location.href = '/login';
+      // 如果是刷新 Token 的请求本身失败了，清除认证状态
+      if (config.url?.includes(AUTH_REFRESH_URL)) {
+        clearAuthAndRedirect();
         return Promise.reject(error);
       }
 
@@ -167,8 +192,16 @@ request.interceptors.response.use(
         config.headers.Authorization = `Bearer ${newAccessToken}`;
         return request(config);
       } catch (refreshError) {
-        storage.clear();
-        window.location.href = '/login';
+        // 刷新失败：公开页面上的请求去掉 Token 重试一次（兜底后端白名单携带无效 Token 仍返回 401 的情况）
+        const isAdminPage = window.location.pathname.startsWith(ADMIN_PATH_PREFIX);
+        if (!isAdminPage && !config._isRetryWithoutToken) {
+          config._isRetryWithoutToken = true;
+          config._skipAuth = true;
+          delete config.headers.Authorization;
+          return request(config);
+        }
+        // 后台页面或重试后仍失败，清除认证状态并跳转
+        clearAuthAndRedirect();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

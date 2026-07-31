@@ -14,6 +14,7 @@ import type { Article } from '@/types/article';
 import type { Category } from '@/types/category';
 import type { Tag as TagType } from '@/types/tag';
 import { ARTICLE_STATUS } from '@/utils/constants';
+import { viewCountTracker } from '@/utils/storage';
 import heroImage from '@/assets/hero.png';
 
 const { Title, Text, Paragraph } = Typography;
@@ -38,7 +39,9 @@ const Home: React.FC = () => {
     getArticleList({ current, size: HOME_PAGE_SIZE, status: ARTICLE_STATUS.PUBLISHED })
       .then((res) => {
         const data = (res as any).data;
-        setArticles(data.records);
+        const records: Article[] = data.records;
+        // 合并本地未同步的阅读量增量
+        setArticles(viewCountTracker.mergeInto(records));
         setTotal(data.total);
       })
       .finally(() => {
