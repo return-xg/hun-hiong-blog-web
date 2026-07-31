@@ -24,3 +24,27 @@ export const ARTICLE_STATUS_MAP: Record<number, string> = {
   [ARTICLE_STATUS.DRAFT]: '草稿',
   [ARTICLE_STATUS.PUBLISHED]: '已发布',
 };
+
+/** 用户状态 */
+export const USER_STATUS = {
+  DISABLED: 0,
+  ENABLED: 1,
+} as const;
+
+/** 用户状态文本映射 */
+export const USER_STATUS_MAP: Record<number, string> = {
+  [USER_STATUS.DISABLED]: '已禁用',
+  [USER_STATUS.ENABLED]: '正常',
+};
+
+/** 用户角色 */
+export const USER_ROLE = {
+  ADMIN: 'admin',
+  USER: 'user',
+} as const;
+
+/** 用户角色文本映射 */
+export const USER_ROLE_MAP: Record<string, string> = {
+  [USER_ROLE.ADMIN]: '管理员',
+  [USER_ROLE.USER]: '普通用户',
+};
