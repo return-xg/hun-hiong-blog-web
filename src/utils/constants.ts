@@ -48,3 +48,13 @@ export const USER_ROLE_MAP: Record<string, string> = {
   [USER_ROLE.ADMIN]: '管理员',
   [USER_ROLE.USER]: '普通用户',
 };
+
+/** 将后端返回的相对文件路径转为完整 URL */
+export function getFileUrl(relativePath?: string): string | undefined {
+  if (!relativePath) return undefined;
+  // 已经是完整 URL 则直接返回
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    return relativePath;
+  }
+  return `${API_BASE_URL}${relativePath}`;
+}

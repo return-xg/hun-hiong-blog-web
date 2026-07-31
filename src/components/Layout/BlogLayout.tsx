@@ -7,11 +7,12 @@ import {
   LoginOutlined,
   LogoutOutlined,
   SettingOutlined,
+  ProfileOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useAppStore } from '@/store/useAppStore';
-import { USER_ROLE } from '@/utils/constants';
+import { USER_ROLE, getFileUrl } from '@/utils/constants';
 import LoginModal from '@/components/LoginModal';
 import RegisterModal from '@/components/RegisterModal';
 
@@ -35,6 +36,12 @@ const BlogLayout: React.FC = () => {
 
   /** 已登录时的下拉菜单 */
   const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      icon: <ProfileOutlined />,
+      label: '个人中心',
+      onClick: () => navigate('/profile'),
+    },
     // 只有管理员才显示后台管理入口
     ...(user?.role === USER_ROLE.ADMIN
       ? [
@@ -88,7 +95,7 @@ const BlogLayout: React.FC = () => {
               <Space style={{ cursor: 'pointer' }}>
                 <Avatar
                   size="small"
-                  src={user?.avatar}
+                  src={getFileUrl(user?.avatar)}
                   icon={<UserOutlined />}
                 />
                 <span>{user?.nickname ?? user?.username ?? '用户'}</span>

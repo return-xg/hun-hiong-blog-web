@@ -33,3 +33,15 @@ export interface AuthUser {
   status?: number;
   createTime?: string;
 }
+
+/** 修改个人信息请求 */
+export interface UpdateProfileRequest {
+  nickname?: string;
+  avatar?: string;
+}
+
+/** 修改密码请求 */
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}

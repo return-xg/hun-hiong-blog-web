@@ -1,6 +1,6 @@
 import request from './request';
 import type { Result } from '@/types/api';
-import type { LoginRequest, RegisterRequest, LoginVO, AuthUser } from '@/types/auth';
+import type { LoginRequest, RegisterRequest, LoginVO, AuthUser, UpdateProfileRequest, ChangePasswordRequest } from '@/types/auth';
 
 /** 登录 */
 export function login(data: LoginRequest): Promise<Result<LoginVO>> {
@@ -20,4 +20,14 @@ export function refreshToken(): Promise<Result<LoginVO>> {
 /** 获取当前用户信息 */
 export function getCurrentUser(): Promise<Result<AuthUser>> {
   return request.get('/auth/info');
+}
+
+/** 修改个人信息 */
+export function updateProfile(data: UpdateProfileRequest): Promise<Result<AuthUser>> {
+  return request.put('/auth/profile', data);
+}
+
+/** 修改密码 */
+export function changePassword(data: ChangePasswordRequest): Promise<Result<void>> {
+  return request.put('/auth/password', data);
 }

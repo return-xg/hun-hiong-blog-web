@@ -5,7 +5,7 @@ import { EyeOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 import { getArticleDetail, incrementArticleView } from '@/api/article';
 import type { Article } from '@/types/article';
-import { ARTICLE_STATUS_MAP } from '@/utils/constants';
+import { ARTICLE_STATUS_MAP, getFileUrl } from '@/utils/constants';
 import { viewCountTracker } from '@/utils/storage';
 
 const { Title, Text, Paragraph } = Typography;
@@ -94,7 +94,7 @@ const ArticleDetail: React.FC = () => {
       {article.coverUrl && (
         <div style={{ marginBottom: 24 }}>
           <img
-            src={article.coverUrl}
+            src={getFileUrl(article.coverUrl)}
             alt={article.title}
             style={{ width: '100%', borderRadius: 8 }}
           />

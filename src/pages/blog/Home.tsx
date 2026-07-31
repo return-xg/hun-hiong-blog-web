@@ -13,7 +13,7 @@ import { getAllTags } from '@/api/tag';
 import type { Article } from '@/types/article';
 import type { Category } from '@/types/category';
 import type { Tag as TagType } from '@/types/tag';
-import { ARTICLE_STATUS } from '@/utils/constants';
+import { ARTICLE_STATUS, getFileUrl } from '@/utils/constants';
 import { viewCountTracker } from '@/utils/storage';
 import heroImage from '@/assets/hero.png';
 
@@ -136,7 +136,7 @@ const Home: React.FC = () => {
                       style={{ flexShrink: 0, width: 200, height: 160 }}
                     >
                       <img
-                        src={article.coverUrl}
+                        src={getFileUrl(article.coverUrl)}
                         alt={article.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />

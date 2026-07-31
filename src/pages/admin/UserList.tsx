@@ -17,7 +17,7 @@ import type { ColumnsType } from 'antd/es/table';
 
 import { getUserList, updateUser, deleteUser } from '@/api/user';
 import type { User } from '@/types/user';
-import { USER_STATUS, USER_STATUS_MAP, USER_ROLE, USER_ROLE_MAP } from '@/utils/constants';
+import { USER_STATUS, USER_STATUS_MAP, USER_ROLE, USER_ROLE_MAP, getFileUrl } from '@/utils/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const { Title } = Typography;
@@ -186,7 +186,7 @@ const UserList: React.FC = () => {
       width: 80,
       render: (url: string) =>
         url ? (
-          <img src={url} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+          <img src={getFileUrl(url)} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
         ) : (
           '-'
         ),
