@@ -156,39 +156,39 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* 区域标题 — 横跨两列，使下方内容自然对齐 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 24,
+        }}
+      >
+        <Title
+          level={4}
+          style={{
+            margin: 0,
+            fontFamily: 'var(--font-serif)',
+            color: 'var(--text-color)',
+          }}
+        >
+          最新文章
+        </Title>
+        <div
+          style={{
+            width: 40,
+            height: 3,
+            borderRadius: 2,
+            background: 'var(--primary-color)',
+          }}
+        />
+      </div>
+
       {/* 主体区域：左侧文章列表 + 右侧侧边栏 */}
       <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start' }}>
         {/* 左侧：文章列表 */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* 区域标题 */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 24,
-            }}
-          >
-            <Title
-              level={4}
-              style={{
-                margin: 0,
-                fontFamily: 'var(--font-serif)',
-                color: 'var(--text-color)',
-              }}
-            >
-              最新文章
-            </Title>
-            <div
-              style={{
-                width: 40,
-                height: 3,
-                borderRadius: 2,
-                background: 'var(--primary-color)',
-              }}
-            />
-          </div>
-
           {loading ? (
             <div style={{ textAlign: 'center', padding: 80 }}>
               <Spin size="large" />
