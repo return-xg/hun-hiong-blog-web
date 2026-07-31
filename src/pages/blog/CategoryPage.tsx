@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Typography, Tag, Spin, Pagination, Space, Empty } from 'antd';
+import { Typography, Tag, Spin, Pagination, Empty } from 'antd';
 import { ClockCircleOutlined, EyeOutlined, FolderOutlined } from '@ant-design/icons';
 
 import { getArticleList } from '@/api/article';
@@ -24,7 +24,6 @@ const CategoryPage: React.FC = () => {
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
 
-  /** 加载分类信息 */
   useEffect(() => {
     if (!id) return;
     getCategoryDetail(id)
@@ -32,11 +31,10 @@ const CategoryPage: React.FC = () => {
         setCategoryInfo((res as any).data);
       })
       .catch(() => {
-        // 分类不存在时保持 null，页面展示兜底文案
+        // 分类不存在时保持 null
       });
   }, [id]);
 
-  /** 加载该分类下的文章列表 */
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -44,7 +42,6 @@ const CategoryPage: React.FC = () => {
       .then((res) => {
         const data = (res as any).data;
         const records: Article[] = data.records;
-        // 合并本地未同步的阅读量增量
         setArticles(viewCountTracker.mergeInto(records));
         setTotal(data.total);
       })
@@ -53,28 +50,39 @@ const CategoryPage: React.FC = () => {
       });
   }, [id, current]);
 
-  /** 分页变化 */
   const handlePageChange = (page: number) => {
     setCurrent(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div style={{ maxWidth: 780, margin: '0 auto' }}>
       {/* 分类标题区 */}
-      <div style={{ marginBottom: 32 }}>
-        <Title level={3} style={{ marginBottom: 8 }}>
-          <FolderOutlined style={{ marginRight: 8 }} />
+      <div
+        style={{
+          marginBottom: 36,
+          padding: '28px 32px',
+          background: 'var(--bg-hero)',
+          borderRadius: 'var(--radius-card)',
+        }}
+      >
+        <Title
+          level={3}
+          style={{
+            marginBottom: 8,
+            fontFamily: 'var(--font-serif)',
+            color: 'var(--text-color)',
+          }}
+        >
+          <FolderOutlined style={{ marginRight: 10, color: 'var(--primary-color)' }} />
           {categoryInfo ? categoryInfo.name : '...'}
         </Title>
         {categoryInfo?.description && (
-          <Paragraph type="secondary" style={{ marginBottom: 4 }}>
+          <Paragraph style={{ color: 'var(--text-secondary)', marginBottom: 4, fontSize: 14 }}>
             {categoryInfo.description}
           </Paragraph>
         )}
-        <div style={{ marginTop: 8 }}>
-          <Text type="secondary">共 {total} 篇文章</Text>
-        </div>
+        <Text style={{ color: 'var(--text-light)', fontSize: 13 }}>共 {total} 篇文章</Text>
       </div>
 
       {/* 文章列表 */}
@@ -87,72 +95,103 @@ const CategoryPage: React.FC = () => {
       ) : (
         <>
           {articles.map((article) => (
-            <article
+            <Link
               key={article.id}
-              style={{
-                marginBottom: 24,
-                padding: '20px 24px',
-                background: 'var(--bg-component, #fff)',
-                borderRadius: 8,
-                border: '1px solid var(--border-color, #f0f0f0)',
-              }}
+              to={`/article/${article.id}`}
+              style={{ display: 'block', textDecoration: 'none' }}
             >
-              {/* 标题 */}
-              <Title level={4} style={{ marginBottom: 8 }}>
-                <Link to={`/article/${article.id}`} style={{ color: 'inherit' }}>
+              <article
+                style={{
+                  marginBottom: 16,
+                  padding: '20px 24px',
+                  background: 'var(--bg-component)',
+                  borderRadius: 'var(--radius-card)',
+                  border: '1px solid var(--border-light)',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'var(--border-light)';
+                }}
+              >
+                <Title
+                  level={4}
+                  style={{
+                    marginBottom: 10,
+                    fontFamily: 'var(--font-serif)',
+                    color: 'var(--text-color)',
+                  }}
+                >
                   {article.title}
-                </Link>
-              </Title>
+                </Title>
 
-              {/* 元信息 */}
-              <div style={{ marginBottom: 12, color: 'var(--text-secondary, #888)' }}>
-                <Space size="middle" wrap>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 16,
+                    marginBottom: 10,
+                    fontSize: 13,
+                    color: 'var(--text-light)',
+                  }}
+                >
                   {article.categoryName && (
-                    <Text type="secondary">
+                    <span>
                       <FolderOutlined style={{ marginRight: 4 }} />
                       {article.categoryName}
-                    </Text>
+                    </span>
                   )}
-                  <Text type="secondary">
+                  <span>
                     <ClockCircleOutlined style={{ marginRight: 4 }} />
                     {article.createTime}
-                  </Text>
-                  <Text type="secondary">
+                  </span>
+                  <span>
                     <EyeOutlined style={{ marginRight: 4 }} />
-                    {article.viewCount} 阅读
-                  </Text>
-                </Space>
-              </div>
+                    {article.viewCount}
+                  </span>
+                </div>
 
-              {/* 标签 */}
-              {article.tags && article.tags.length > 0 && (
-                <div style={{ marginBottom: 12 }}>
-                  {article.tags.map((tag) => (
-                    <Link key={tag.id} to={`/tag/${tag.id}`}>
-                      <Tag style={{ marginBottom: 4, cursor: 'pointer' }}>
+                {article.tags && article.tags.length > 0 && (
+                  <div style={{ marginBottom: 8 }}>
+                    {article.tags.slice(0, 4).map((tag) => (
+                      <Tag
+                        key={tag.id}
+                        style={{
+                          marginBottom: 4,
+                          background: 'var(--tag-bg)',
+                          color: 'var(--tag-text)',
+                          border: 'none',
+                          borderRadius: 'var(--radius-tag)',
+                          fontSize: 12,
+                        }}
+                      >
                         {tag.name}
                       </Tag>
-                    </Link>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              {/* 摘要 */}
-              {article.summary && (
-                <Paragraph
-                  type="secondary"
-                  ellipsis={{ rows: 2 }}
-                  style={{ marginBottom: 0 }}
-                >
-                  {article.summary}
-                </Paragraph>
-              )}
-            </article>
+                {article.summary && (
+                  <Paragraph
+                    style={{ color: 'var(--text-secondary)', marginBottom: 0, fontSize: 14, lineHeight: 1.7 }}
+                    ellipsis={{ rows: 2 }}
+                  >
+                    {article.summary}
+                  </Paragraph>
+                )}
+              </article>
+            </Link>
           ))}
 
-          {/* 分页 */}
           {total > PAGE_SIZE && (
-            <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <div style={{ textAlign: 'center', marginTop: 40 }}>
               <Pagination
                 current={current}
                 total={total}

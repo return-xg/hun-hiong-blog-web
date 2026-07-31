@@ -34,11 +34,34 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f5f5f5' }}>
-      <Card style={{ width: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'var(--bg-hero)',
+      }}
+    >
+      <Card
+        style={{
+          width: 420,
+          borderRadius: 'var(--radius-card)',
+          boxShadow: 'var(--shadow-float)',
+          border: 'none',
+        }}
+      >
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <Title level={3} style={{ textAlign: 'center', marginBottom: 0 }}>
-            注册 Hun Hiong Blog
+          <Title
+            level={3}
+            style={{
+              textAlign: 'center',
+              marginBottom: 0,
+              fontFamily: 'var(--font-serif)',
+              color: 'var(--primary-color)',
+            }}
+          >
+            创建账号
           </Title>
 
           <Form
@@ -95,7 +118,7 @@ const Register: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" loading={loading} block>
+              <Button type="primary" htmlType="submit" loading={loading} block shape="round">
                 注册
               </Button>
             </Form.Item>

@@ -15,18 +15,13 @@ const Login: React.FC = () => {
   const onFinish = async (values: LoginRequest) => {
     setLoading(true);
     try {
-      // 登录接口返回 LoginVO（包含 accessToken 和 refreshToken）
       const res = await login(values);
       const { accessToken, refreshToken } = res.data as LoginVO;
 
-      // 存储双 Token，以便后续请求携带
       useAuthStore.getState().refreshAuth(accessToken, refreshToken, null);
 
-      // 获取当前用户信息
       const userRes = await getCurrentUser();
       const user = userRes.data;
-
-      // 更新 Store 中的用户信息
       useAuthStore.getState().setUser(user);
 
       message.success('登录成功');
@@ -39,11 +34,34 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f5f5f5' }}>
-      <Card style={{ width: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'var(--bg-hero)',
+      }}
+    >
+      <Card
+        style={{
+          width: 420,
+          borderRadius: 'var(--radius-card)',
+          boxShadow: 'var(--shadow-float)',
+          border: 'none',
+        }}
+      >
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <Title level={3} style={{ textAlign: 'center', marginBottom: 0 }}>
-            登录 Hun Hiong Blog
+          <Title
+            level={3}
+            style={{
+              textAlign: 'center',
+              marginBottom: 0,
+              fontFamily: 'var(--font-serif)',
+              color: 'var(--primary-color)',
+            }}
+          >
+            欢迎回来
           </Title>
 
           <Form
@@ -73,7 +91,7 @@ const Login: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" loading={loading} block>
+              <Button type="primary" htmlType="submit" loading={loading} block shape="round">
                 登录
               </Button>
             </Form.Item>

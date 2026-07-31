@@ -1,9 +1,51 @@
 :root {
-  --primary-color: #1677ff;
-  --bg-color: #f5f5f5;
-  --bg-component: #ffffff;
-  --text-color: #333333;
-  --text-secondary: #888888;
-  --border-color: #e8e8e8;
+  /* 主色 — 清新薄荷绿 */
+  --primary-color: #5BA4A4;
+  --primary-hover: #4A8F8F;
+  --primary-light: #E8F4F4;
+
+  /* 强调色 — 温暖珊瑚橘 */
+  --accent-color: #E8836B;
+  --accent-light: #FFF0EC;
+
+  /* 背景色 */
+  --bg-color: #FAFCF8;
+  --bg-component: #FFFFFF;
+  --bg-secondary: #EFF5F0;
+  --bg-hero: linear-gradient(135deg, #E8F4F4 0%, #FFF7F0 50%, #F0F7E8 100%);
+
+  /* 文字色 */
+  --text-color: #2D3436;
+  --text-secondary: #7F8C8D;
+  --text-light: #B2BEC3;
+
+  /* 边框 */
+  --border-color: #E8F0E8;
+  --border-light: #F0F5F0;
+
+  /* 标签色 */
+  --tag-bg: #E8F4F4;
+  --tag-text: #3D8B8B;
+  --tag-accent-bg: #FFF0EC;
+  --tag-accent-text: #C0604A;
+
+  /* 圆角 */
+  --radius-card: 16px;
+  --radius-button: 10px;
+  --radius-tag: 20px;
+  --radius-sm: 8px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.1);
+
+  /* 字体 */
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Georgia', serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* 布局 */
   --header-height: 64px;
+  --content-max-width: 1100px;
 }

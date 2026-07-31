@@ -23,28 +23,31 @@ import { getFileUrl } from '@/utils/constants';
 
 const { Title } = Typography;
 
+/** 卡片通用样式 */
+const cardStyle: React.CSSProperties = {
+  borderRadius: 'var(--radius-card)',
+  border: '1px solid var(--border-light)',
+  boxShadow: 'var(--shadow-sm)',
+};
+
 /** 个人中心页面 */
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { user: authUser, setUser, isAuthenticated } = useAuthStore();
 
-  // 个人信息表单
   const [profileForm] = Form.useForm();
   const [profileLoading, setProfileLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(authUser?.avatar);
 
-  // 修改密码表单
   const [passwordForm] = Form.useForm();
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  // 未登录重定向
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
-  // 加载最新用户信息
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -66,7 +69,6 @@ const Profile: React.FC = () => {
     }
   }, [isAuthenticated, setUser, profileForm]);
 
-  /** 提交个人信息修改 */
   const handleProfileSubmit = async () => {
     try {
       const values = await profileForm.validateFields();
@@ -80,13 +82,12 @@ const Profile: React.FC = () => {
         message.success('个人信息修改成功');
       }
     } catch {
-      // 表单校验失败或请求错误（拦截器已提示）
+      // 表单校验失败或请求错误
     } finally {
       setProfileLoading(false);
     }
   };
 
-  /** 提交密码修改 */
   const handlePasswordSubmit = async () => {
     try {
       const values = await passwordForm.validateFields();
@@ -98,7 +99,6 @@ const Profile: React.FC = () => {
       if (result.code === 0) {
         message.success('密码修改成功，请重新登录');
         passwordForm.resetFields();
-        // 修改密码后退出登录
         setTimeout(() => {
           useAuthStore.getState().logout();
           navigate('/');
@@ -111,7 +111,6 @@ const Profile: React.FC = () => {
     }
   };
 
-  /** 上传头像前校验 */
   const beforeUpload = (file: UploadFile) => {
     const isImage = file.type?.startsWith('image/');
     if (!isImage) {
@@ -126,7 +125,6 @@ const Profile: React.FC = () => {
     return true;
   };
 
-  /** 自定义上传头像 */
   const handleAvatarUpload = async (options: { file: File; onSuccess?: () => void; onError?: (err: Error) => void }) => {
     try {
       const result = await uploadFile(options.file);
@@ -140,11 +138,39 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto' }}>
-      <Title level={3}>个人中心</Title>
+    <div style={{ maxWidth: 580, margin: '0 auto' }}>
+      {/* 标题区 */}
+      <div
+        style={{
+          marginBottom: 32,
+          padding: '28px 32px',
+          background: 'var(--bg-hero)',
+          borderRadius: 'var(--radius-card)',
+          textAlign: 'center',
+        }}
+      >
+        <Title
+          level={3}
+          style={{
+            fontFamily: 'var(--font-serif)',
+            color: 'var(--text-color)',
+            marginBottom: 0,
+          }}
+        >
+          个人中心
+        </Title>
+      </div>
 
       {/* 个人信息 */}
-      <Card title="个人信息" style={{ marginBottom: 24 }}>
+      <Card
+        title={
+          <span style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-color)', fontSize: 15 }}>
+            个人信息
+          </span>
+        }
+        style={{ ...cardStyle, marginBottom: 20 }}
+        styles={{ header: { borderBottomColor: 'var(--border-light)' } }}
+      >
         <Form form={profileForm} layout="vertical">
           <Form.Item label="账号">
             <Input value={authUser?.username ?? ''} disabled />
@@ -152,7 +178,12 @@ const Profile: React.FC = () => {
 
           <Form.Item label="头像">
             <Space align="center">
-              <Avatar size={64} src={getFileUrl(avatarUrl)} icon={<UserOutlined />} />
+              <Avatar
+                size={64}
+                src={getFileUrl(avatarUrl)}
+                icon={<UserOutlined />}
+                style={{ border: '2px solid var(--primary-light)' }}
+              />
               <Upload
                 showUploadList={false}
                 beforeUpload={beforeUpload}
@@ -179,10 +210,18 @@ const Profile: React.FC = () => {
         </Form>
       </Card>
 
-      <Divider />
+      <Divider style={{ borderColor: 'var(--border-light)' }} />
 
       {/* 修改密码 */}
-      <Card title="修改密码">
+      <Card
+        title={
+          <span style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-color)', fontSize: 15 }}>
+            修改密码
+          </span>
+        }
+        style={cardStyle}
+        styles={{ header: { borderBottomColor: 'var(--border-light)' } }}
+      >
         <Form form={passwordForm} layout="vertical">
           <Form.Item
             name="oldPassword"

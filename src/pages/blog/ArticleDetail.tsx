@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Tag, Divider, Spin, Space } from 'antd';
-import { EyeOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Typography, Tag, Divider, Spin } from 'antd';
+import { EyeOutlined, ClockCircleOutlined, FolderOutlined } from '@ant-design/icons';
 
 import { getArticleDetail, incrementArticleView } from '@/api/article';
 import type { Article } from '@/types/article';
 import { ARTICLE_STATUS_MAP, getFileUrl } from '@/utils/constants';
 import { viewCountTracker } from '@/utils/storage';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 const ArticleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,15 +22,12 @@ const ArticleDetail: React.FC = () => {
     getArticleDetail(id)
       .then((res) => {
         const articleData = (res as any).data as Article;
-        // 合并本地未同步的阅读量增量（弥合后端 5 分钟批量同步延迟）
         const [merged] = viewCountTracker.mergeInto([articleData]);
         setArticle(merged);
 
-        // 每次进入页面调用一次，阅读量 +1
         incrementArticleView(id).then(() => {
           const dbViewCount = articleData.viewCount ?? 0;
           viewCountTracker.recordIncrement(id, dbViewCount);
-          // 重新合并以展示最新的本地增量
           const [updated] = viewCountTracker.mergeInto([articleData]);
           setArticle(updated);
         });
@@ -49,71 +46,132 @@ const ArticleDetail: React.FC = () => {
   }
 
   if (!article) {
-    return <Title level={4} style={{ textAlign: 'center', padding: 80 }}>文章不存在</Title>;
+    return (
+      <Title level={4} style={{ textAlign: 'center', padding: 80, fontFamily: 'var(--font-serif)' }}>
+        文章不存在
+      </Title>
+    );
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 16px' }}>
-      {/* 文章标题 */}
-      <Title level={2} style={{ marginBottom: 8 }}>{article.title}</Title>
+    <div style={{ maxWidth: 780, margin: '0 auto', padding: '16px 0' }}>
+      {/* 文章头部 */}
+      <div style={{ marginBottom: 32 }}>
+        {/* 标签 */}
+        {article.tags && article.tags.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            {article.tags.map((tag) => (
+              <Tag
+                key={tag.id}
+                style={{
+                  marginBottom: 4,
+                  background: 'var(--tag-bg)',
+                  color: 'var(--tag-text)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-tag)',
+                }}
+              >
+                {tag.name}
+              </Tag>
+            ))}
+          </div>
+        )}
 
-      {/* 文章元信息 */}
-      <div style={{ marginBottom: 16, color: 'var(--text-secondary, #888)' }}>
-        <Space size="middle" wrap>
+        {/* 标题 */}
+        <Title
+          level={1}
+          style={{
+            fontFamily: 'var(--font-serif)',
+            color: 'var(--text-color)',
+            marginBottom: 16,
+            fontSize: 32,
+            fontWeight: 700,
+            lineHeight: 1.4,
+          }}
+        >
+          {article.title}
+        </Title>
+
+        {/* 元信息 */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            fontSize: 14,
+            color: 'var(--text-light)',
+          }}
+        >
           {article.categoryName && (
-            <Text type="secondary">{article.categoryName}</Text>
+            <span>
+              <FolderOutlined style={{ marginRight: 4 }} />
+              {article.categoryName}
+            </span>
           )}
-          <Text type="secondary">
+          <span>
             <ClockCircleOutlined style={{ marginRight: 4 }} />
             {article.createTime}
-          </Text>
-          <Text type="secondary">
+          </span>
+          <span>
             <EyeOutlined style={{ marginRight: 4 }} />
             {article.viewCount} 阅读
-          </Text>
+          </span>
           {article.status !== undefined && (
-            <Tag color={article.status === 1 ? 'green' : 'default'}>
+            <Tag
+              color={article.status === 1 ? 'cyan' : 'default'}
+              style={{ borderRadius: 'var(--radius-tag)' }}
+            >
               {ARTICLE_STATUS_MAP[article.status] || '未知'}
             </Tag>
           )}
-        </Space>
-      </div>
-
-      {/* 标签 */}
-      {article.tags && article.tags.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          {article.tags.map((tag) => (
-            <Tag key={tag.id} style={{ marginBottom: 4 }}>
-              {tag.name}
-            </Tag>
-          ))}
         </div>
-      )}
+      </div>
 
       {/* 封面图 */}
       {article.coverUrl && (
-        <div style={{ marginBottom: 24 }}>
+        <div
+          style={{
+            marginBottom: 32,
+            borderRadius: 'var(--radius-card)',
+            overflow: 'hidden',
+          }}
+        >
           <img
             src={getFileUrl(article.coverUrl)}
             alt={article.title}
-            style={{ width: '100%', borderRadius: 8 }}
+            style={{ width: '100%', display: 'block' }}
           />
         </div>
       )}
 
       {/* 摘要 */}
       {article.summary && (
-        <Paragraph
-          type="secondary"
-          style={{ marginBottom: 24, padding: '12px 16px', background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 6, borderLeft: '4px solid var(--primary-color, #1677ff)' }}
+        <div
+          style={{
+            marginBottom: 32,
+            padding: '16px 24px',
+            background: 'var(--primary-light)',
+            borderRadius: 'var(--radius-card)',
+            borderLeft: '3px solid var(--primary-color)',
+          }}
         >
-          {article.summary}
-        </Paragraph>
+          <Paragraph
+            style={{
+              color: 'var(--text-secondary)',
+              marginBottom: 0,
+              fontSize: 15,
+              lineHeight: 1.8,
+              fontStyle: 'italic',
+            }}
+          >
+            {article.summary}
+          </Paragraph>
+        </div>
       )}
 
-      <Divider />
+      <Divider style={{ borderColor: 'var(--border-light)', margin: '24px 0' }} />
 
-      {/* 文章正文（富文本 HTML） */}
+      {/* 文章正文 */}
       <div
         className="article-content"
         dangerouslySetInnerHTML={{ __html: article.content || '' }}
