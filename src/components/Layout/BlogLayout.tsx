@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Button, Dropdown, Avatar, Space } from 'antd';
 import {
@@ -25,8 +26,17 @@ const menuItems = [
 
 const BlogLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, initUser, logout } = useAuthStore();
   const { openLoginModal } = useAppStore();
+  const [userInitialized, setUserInitialized] = useState(false);
+
+  // 页面刷新后，如果有 token 但没有用户信息，从接口恢复
+  useEffect(() => {
+    if (isAuthenticated && !user && !userInitialized) {
+      setUserInitialized(true);
+      initUser();
+    }
+  }, [isAuthenticated, user, userInitialized, initUser]);
 
   /** 退出登录 */
   const handleLogout = () => {
