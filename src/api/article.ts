@@ -24,12 +24,12 @@ export function updateArticle(id: string | number, data: Partial<Article>): Prom
 
 /** 删除文章 */
 export function deleteArticle(id: string | number): Promise<Result<void>> {
-  return request.delete(`/article/${id}`);
+  return request.delete('/article/batch', { data: [String(id)] });
 }
 
 /** 批量删除文章 */
 export function batchDeleteArticles(ids: (string | number)[]): Promise<Result<void>> {
-  return request.delete('/article/batch', { data: ids });
+  return request.delete('/article/batch', { data: ids.map(String) });
 }
 
 /** 发布文章 */
