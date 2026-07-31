@@ -7,15 +7,17 @@ import {
   TagsOutlined,
   EyeOutlined,
   LikeOutlined,
-  ArrowUpOutlined,
+  PieChartOutlined,
+  FireOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Tooltip as ReTooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 
-import { getDashboardOverview, getDashboardTrend, getRecentArticles } from '@/api/dashboard';
-import type { DashboardOverview, DailyViewTrend, RecentArticle } from '@/types/dashboard';
+import { getDashboardOverview, getCategoryDistribution, getTopArticles, getRecentArticles } from '@/api/dashboard';
+import type { DashboardOverview, CategoryDistribution, TopArticle, RecentArticle } from '@/types/dashboard';
 
 const { Title, Text } = Typography;
 
@@ -28,6 +30,9 @@ const STAT_CARDS = [
   { key: 'likeCount', label: '总点赞数', icon: <LikeOutlined />, gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
 ] as const;
 
+/** 饼图配色 */
+const PIE_COLORS = ['#667eea', '#f5576c', '#00f2fe', '#43e97b', '#fa709a', '#fee140', '#764ba2', '#4facfe'];
+
 /** 格式化数字：超过 1000 显示 x.xk */
 const formatNumber = (num: number): string => {
   if (num >= 10000) return `${(num / 10000).toFixed(1)}w`;
@@ -37,7 +42,8 @@ const formatNumber = (num: number): string => {
 
 const Dashboard: React.FC = () => {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
-  const [trend, setTrend] = useState<DailyViewTrend[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryDistribution[]>([]);
+  const [topArticles, setTopArticles] = useState<TopArticle[]>([]);
   const [recentArticles, setRecentArticles] = useState<RecentArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,12 +52,14 @@ const Dashboard: React.FC = () => {
     setLoading(true);
     Promise.all([
       getDashboardOverview(),
-      getDashboardTrend(),
+      getCategoryDistribution(),
+      getTopArticles(),
       getRecentArticles(),
     ])
-      .then(([overviewRes, trendRes, articlesRes]) => {
+      .then(([overviewRes, categoryRes, topRes, articlesRes]) => {
         setOverview((overviewRes as any).data);
-        setTrend((trendRes as any).data);
+        setCategoryData((categoryRes as any).data);
+        setTopArticles((topRes as any).data);
         setRecentArticles((articlesRes as any).data);
       })
       .finally(() => setLoading(false));
@@ -75,7 +83,20 @@ const Dashboard: React.FC = () => {
       dataIndex: 'categoryName',
       key: 'categoryName',
       width: 120,
-      render: (text: string) => text ? <Tag>{text}</Tag> : '-',
+      render: (_: string, record: RecentArticle) => {
+        const name = record.categoryName || record.category_name;
+        return name ? <Tag>{name}</Tag> : '-';
+      },
+    },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      key: 'tags',
+      width: 180,
+      render: (tags: RecentArticle['tags']) =>
+        tags && tags.length > 0
+          ? tags.map((tag) => <Tag key={tag.id}>{tag.name}</Tag>)
+          : '-',
     },
     {
       title: '浏览量',
@@ -91,10 +112,11 @@ const Dashboard: React.FC = () => {
       ),
     },
     {
-      title: '发布时间',
+      title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
       width: 180,
+      render: (_: string, record: RecentArticle) => record.createTime || record.create_time || '-',
     },
   ];
 
@@ -164,57 +186,107 @@ const Dashboard: React.FC = () => {
         })}
       </div>
 
-      {/* 浏览趋势图 */}
-      <Card
-        title={
-          <Space>
-            <ArrowUpOutlined style={{ color: '#52c41a' }} />
-            <span>近 7 天浏览趋势</span>
-          </Space>
-        }
-        style={{ marginBottom: 24, borderRadius: 12 }}
-        styles={{ body: { padding: '16px 8px 8px' } }}
-      >
-        <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={trend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="viewGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#667eea" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 12, fill: '#888' }}
-              axisLine={{ stroke: '#e8e8e8' }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 12, fill: '#888' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              contentStyle={{
-                borderRadius: 8,
-                border: 'none',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              }}
-              formatter={(value) => [`${value} 次`, '浏览量']}
-            />
-            <Area
-              type="monotone"
-              dataKey="viewCount"
-              stroke="#667eea"
-              strokeWidth={2.5}
-              fill="url(#viewGradient)"
-              dot={{ r: 4, fill: '#667eea', strokeWidth: 2, stroke: '#fff' }}
-              activeDot={{ r: 6, fill: '#667eea', stroke: '#fff', strokeWidth: 2 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Card>
+      {/* 图表区域：分类分布 + 热门文章 Top5 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        {/* 分类文章分布（饼图） */}
+        <Card
+          title={
+            <Space>
+              <PieChartOutlined style={{ color: '#667eea' }} />
+              <span>分类文章分布</span>
+            </Space>
+          }
+          style={{ borderRadius: 12 }}
+          styles={{ body: { padding: '8px 0' } }}
+        >
+          {categoryData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  dataKey="articleCount"
+                  nameKey="categoryName"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={3}
+                  label={(entry: any) => `${entry.categoryName} ${entry.articleCount}`}
+                  labelLine={{ stroke: '#999' }}
+                >
+                  {categoryData.map((_, index) => (
+                    <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <ReTooltip
+                  contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  formatter={(value) => [`${value} 篇`, '文章数']}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <Text type="secondary">暂无分类数据</Text>
+            </div>
+          )}
+        </Card>
+
+        {/* 热门文章 Top 5（柱状图） */}
+        <Card
+          title={
+            <Space>
+              <FireOutlined style={{ color: '#f5576c' }} />
+              <span>热门文章 Top 5</span>
+            </Space>
+          }
+          style={{ borderRadius: 12 }}
+          styles={{ body: { padding: '8px 8px 0' } }}
+        >
+          {topArticles.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={topArticles} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#667eea" />
+                    <stop offset="100%" stopColor="#764ba2" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 12, fill: '#888' }}
+                  axisLine={{ stroke: '#e8e8e8' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="title"
+                  width={120}
+                  tick={{ fontSize: 12, fill: '#555' }}
+                  axisLine={false}
+                  tickLine={false}
+                  // 标题过长时截断
+                  tickFormatter={(val: string) => (val.length > 8 ? `${val.slice(0, 8)}...` : val)}
+                />
+                <ReTooltip
+                  contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  formatter={(value) => [`${value} 次`, '浏览量']}
+                />
+                <Bar
+                  dataKey="viewCount"
+                  fill="url(#barGradient)"
+                  radius={[0, 6, 6, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <Text type="secondary">暂无文章数据</Text>
+            </div>
+          )}
+        </Card>
+      </div>
 
       {/* 最近文章 */}
       <Card
