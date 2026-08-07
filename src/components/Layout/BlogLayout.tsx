@@ -16,6 +16,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { USER_ROLE, getFileUrl } from '@/utils/constants';
 import LoginModal from '@/components/LoginModal';
 import RegisterModal from '@/components/RegisterModal';
+import MusicPlayer from '@/components/MusicPlayer';
 
 const { Header, Content, Footer } = Layout;
 
@@ -197,6 +198,9 @@ const BlogLayout: React.FC = () => {
       {/* 登录/注册弹窗 */}
       <LoginModal />
       <RegisterModal />
+
+      {/* 全局音乐播放器 */}
+      <MusicPlayer />
     </Layout>
   );
 };

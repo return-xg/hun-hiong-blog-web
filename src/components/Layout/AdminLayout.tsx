@@ -10,6 +10,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   HomeOutlined,
+  CustomerServiceOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -22,6 +23,7 @@ const menuItems = [
   { key: '/admin/categories', icon: <AppstoreOutlined />, label: '分类管理' },
   { key: '/admin/tags', icon: <TagsOutlined />, label: '标签管理' },
   { key: '/admin/users', icon: <UserOutlined />, label: '用户管理' },
+  { key: '/admin/music', icon: <CustomerServiceOutlined />, label: '音乐管理' },
 ];
 
 const AdminLayout: React.FC = () => {

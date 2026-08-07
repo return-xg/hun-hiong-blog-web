@@ -10,6 +10,7 @@ import ArticleEdit from '@/pages/admin/ArticleEdit';
 import CategoryList from '@/pages/admin/CategoryList';
 import TagList from '@/pages/admin/TagList';
 import UserList from '@/pages/admin/UserList';
+import MusicManage from '@/pages/admin/MusicManage';
 import Home from '@/pages/blog/Home';
 import ArticleDetail from '@/pages/blog/ArticleDetail';
 import CategoryPage from '@/pages/blog/CategoryPage';
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
       { path: 'categories', element: <CategoryList /> },
       { path: 'tags', element: <TagList /> },
       { path: 'users', element: <UserList /> },
+      { path: 'music', element: <MusicManage /> },
     ],
   },
   // 兜底重定向

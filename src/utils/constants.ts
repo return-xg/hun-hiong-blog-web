@@ -49,6 +49,21 @@ export const USER_ROLE_MAP: Record<string, string> = {
   [USER_ROLE.USER]: '普通用户',
 };
 
+/** 音乐状态 */
+export const MUSIC_STATUS = {
+  DISABLED: 0,
+  ENABLED: 1,
+} as const;
+
+/** 音乐状态文本映射 */
+export const MUSIC_STATUS_MAP: Record<number, string> = {
+  [MUSIC_STATUS.DISABLED]: '禁用',
+  [MUSIC_STATUS.ENABLED]: '启用',
+};
+
+/** 音乐上传支持的文件类型 */
+export const MUSIC_ACCEPT_TYPES = '.mp3,.wav';
+
 /** 将后端返回的相对文件路径转为完整 URL */
 export function getFileUrl(relativePath?: string): string | undefined {
   if (!relativePath) return undefined;
