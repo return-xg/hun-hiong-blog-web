@@ -25,6 +25,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { uploadMusic, updateMusic } from '@/api/music';
+import { uploadFile } from '@/api/file';
 import { useMusicManageStore } from '@/store/useMusicManageStore';
 import { getFileUrl, MUSIC_STATUS, MUSIC_STATUS_MAP, MUSIC_ACCEPT_TYPES } from '@/utils/constants';
 import type { Music } from '@/types/music';
@@ -56,6 +57,7 @@ const MusicManage: React.FC = () => {
   const [editingMusic, setEditingMusic] = useState<Music | null>(null);
   const [editConfirmLoading, setEditConfirmLoading] = useState(false);
   const [editForm] = Form.useForm();
+  const [editCoverFile, setEditCoverFile] = useState<File | null>(null);
 
   // 批量选择
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -125,10 +127,10 @@ const MusicManage: React.FC = () => {
 
   const handleEdit = (record: Music) => {
     setEditingMusic(record);
+    setEditCoverFile(null);
     editForm.setFieldsValue({
       title: record.title,
       artist: record.artist,
-      cover: record.cover,
       duration: record.duration,
       sort: record.sort,
       status: record.status,
@@ -141,10 +143,18 @@ const MusicManage: React.FC = () => {
     const values = await editForm.validateFields();
     setEditConfirmLoading(true);
     try {
+      // 如果选择了新封面文件，先上传获取 URL
+      if (editCoverFile) {
+        const fileResult = await uploadFile(editCoverFile);
+        if (fileResult.code === 0) {
+          values.cover = fileResult.data.url;
+        }
+      }
       await updateMusic(editingMusic.id, values);
       message.success('更新成功');
       setEditModalOpen(false);
       editForm.resetFields();
+      setEditCoverFile(null);
       fetchList(pagination.current, pagination.pageSize);
     } finally {
       setEditConfirmLoading(false);
@@ -154,6 +164,7 @@ const MusicManage: React.FC = () => {
   const handleEditCancel = () => {
     setEditModalOpen(false);
     editForm.resetFields();
+    setEditCoverFile(null);
   };
 
   // ========== 删除操作 ==========
@@ -367,8 +378,31 @@ const MusicManage: React.FC = () => {
           <Form.Item name="artist" label="歌手">
             <Input placeholder="请输入歌手" />
           </Form.Item>
-          <Form.Item name="cover" label="封面地址">
-            <Input placeholder="请输入封面 URL" />
+          <Form.Item label="封面图片" extra="选填，支持 JPG/PNG 格式，不上传则保留原封面">
+            {editingMusic?.cover && !editCoverFile && (
+              <div style={{ marginBottom: 8 }}>
+                <Image
+                  src={getFileUrl(editingMusic.cover)}
+                  alt="当前封面"
+                  width={64}
+                  height={64}
+                  style={{ objectFit: 'cover', borderRadius: 4 }}
+                  preview={false}
+                />
+              </div>
+            )}
+            <Upload
+              beforeUpload={(file) => {
+                setEditCoverFile(file);
+                return false;
+              }}
+              maxCount={1}
+              accept=".jpg,.jpeg,.png"
+              onRemove={() => setEditCoverFile(null)}
+              listType="picture"
+            >
+              <Button icon={<PlusOutlined />}>{editCoverFile ? '更换封面' : '选择封面图片'}</Button>
+            </Upload>
           </Form.Item>
           <Form.Item name="duration" label="时长（秒）">
             <InputNumber min={0} placeholder="请输入时长" style={{ width: '100%' }} />

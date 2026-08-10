@@ -27,7 +27,7 @@ interface MusicState {
   /** 加载歌曲列表 */
   loadMusicList: () => Promise<void>;
   /** 播放指定索引的歌曲 */
-  playMusic: (index: number) => void;
+  playMusic: (index: number) => Promise<void>;
   /** 暂停 */
   pauseMusic: () => void;
   /** 继续播放 */
@@ -63,27 +63,41 @@ export const useMusicStore = create<MusicState>((set, get) => ({
       const result = await getMusicList();
       if (result.code === 0 && result.data.length > 0) {
         set({ musicList: result.data });
-        // 列表加载成功后自动选中第一首，让播放器显示出来
-        const firstMusic = result.data[0];
-        set({ currentMusic: firstMusic, currentIndex: 0, duration: firstMusic.duration });
+        // 尝试直接播放第一首
+        get().playMusic(0);
+
+        // 浏览器可能阻止无用户交互的自动播放，监听首次交互后补播
+        const tryResume = () => {
+          const { isPlaying, currentMusic } = get();
+          if (currentMusic && !isPlaying) {
+            get().resumeMusic();
+          }
+          window.removeEventListener('click', tryResume);
+          window.removeEventListener('keydown', tryResume);
+          window.removeEventListener('touchstart', tryResume);
+        };
+        window.addEventListener('click', tryResume, { once: false });
+        window.addEventListener('keydown', tryResume, { once: false });
+        window.addEventListener('touchstart', tryResume, { once: false });
       }
     } catch {
       // 加载失败由拦截器统一处理
     }
   },
 
-  playMusic: (index) => {
+  playMusic: async (index) => {
     const { musicList } = get();
     if (index < 0 || index >= musicList.length) return;
     const music = musicList[index];
-    audioManager.play(music.url);
-    audioManager.setVolume(get().volume);
+    // 先更新状态，再加载并播放音频
     set({
       currentMusic: music,
       currentIndex: index,
       isPlaying: true,
       duration: music.duration,
     });
+    await audioManager.play(music.url);
+    audioManager.setVolume(get().volume);
   },
 
   pauseMusic: () => {

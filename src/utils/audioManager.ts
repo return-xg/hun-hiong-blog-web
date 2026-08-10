@@ -85,6 +85,41 @@ class AudioManager {
     this.audio.pause();
   }
 
+  /** 预加载音频（加载到 blob 但不自动播放） */
+  async preload(url: string) {
+    const fullUrl = getFileUrl(url) ?? url;
+
+    // 已加载同一音频则跳过
+    if (this.audio.src === fullUrl || this.currentBlobUrl === fullUrl) {
+      return;
+    }
+
+    try {
+      const headers: Record<string, string> = {};
+      const token = storage.getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(fullUrl, { headers });
+      if (!response.ok) {
+        throw new Error(`音频加载失败: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      if (this.currentBlobUrl) {
+        URL.revokeObjectURL(this.currentBlobUrl);
+      }
+      this.currentBlobUrl = blobUrl;
+      this.audio.src = blobUrl;
+    } catch {
+      // CORS 等场景回退到直接设置 src
+      this.audio.src = fullUrl;
+    }
+  }
+
   /** 继续播放 */
   resume() {
     this.audio.play().catch(() => {});
