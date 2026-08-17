@@ -64,6 +64,21 @@ export const MUSIC_STATUS_MAP: Record<number, string> = {
 /** 音乐上传支持的文件类型 */
 export const MUSIC_ACCEPT_TYPES = '.mp3,.wav';
 
+/** 评论最大字数 */
+export const COMMENT_MAX_LENGTH = 1000;
+
+/** 评论一级评论的 parentId */
+export const COMMENT_ROOT_PARENT_ID = 0;
+
+/** 评论错误码 */
+export const COMMENT_ERROR_CODE = {
+  NOT_FOUND: 10001,
+  NO_PERMISSION: 10002,
+  SENSITIVE_WORD: 10003,
+  TOO_FREQUENT: 10004,
+  NOT_LOGGED_IN: 10005,
+} as const;
+
 /** 将后端返回的相对文件路径转为完整 URL */
 export function getFileUrl(relativePath?: string): string | undefined {
   if (!relativePath) return undefined;

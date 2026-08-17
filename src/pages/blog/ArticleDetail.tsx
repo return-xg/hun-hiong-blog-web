@@ -7,6 +7,7 @@ import { getArticleList, getArticleDetail, incrementArticleView } from '@/api/ar
 import type { Article } from '@/types/article';
 import { ARTICLE_STATUS, ARTICLE_STATUS_MAP, getFileUrl } from '@/utils/constants';
 import { viewCountTracker } from '@/utils/storage';
+import CommentSection from '@/components/comment/CommentSection';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -239,6 +240,10 @@ const ArticleDetail: React.FC = () => {
         className="article-content"
         dangerouslySetInnerHTML={{ __html: article.content || '' }}
       />
+
+      {/* 评论区 */}
+      <Divider style={{ borderColor: 'var(--border-light)', margin: '40px 0 0' }} />
+      <CommentSection articleId={Number(id)} />
 
       {/* 推荐阅读 — 轻量链接列表，与首页卡片布局区分 */}
       {recommendArticles.length > 0 && (
