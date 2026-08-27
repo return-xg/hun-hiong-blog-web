@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Button, Dropdown, Avatar, Space } from 'antd';
 import {
@@ -17,6 +17,7 @@ import { USER_ROLE, getFileUrl } from '@/utils/constants';
 import LoginModal from '@/components/LoginModal';
 import RegisterModal from '@/components/RegisterModal';
 import MusicPlayer from '@/components/MusicPlayer';
+import HeaderSearch from '@/components/HeaderSearch';
 
 const { Header, Content, Footer } = Layout;
 
@@ -44,6 +45,11 @@ const BlogLayout: React.FC = () => {
     logout();
     navigate('/');
   };
+
+  /** 顶部搜索框搜索 */
+  const handleHeaderSearch = useCallback((keyword: string) => {
+    navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
+  }, [navigate]);
 
   /** 已登录时的下拉菜单 */
   const userMenuItems: MenuProps['items'] = [
@@ -121,8 +127,10 @@ const BlogLayout: React.FC = () => {
           }}
         />
 
-        {/* 右侧用户区 */}
-        <div>
+        {/* 右侧区域 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* 搜索框 */}
+          <HeaderSearch onSearch={handleHeaderSearch} />
           {isAuthenticated ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Space

@@ -17,6 +17,7 @@ import CategoryPage from '@/pages/blog/CategoryPage';
 import TagPage from '@/pages/blog/TagPage';
 import About from '@/pages/blog/About';
 import Profile from '@/pages/blog/Profile';
+import SearchPage from '@/pages/blog/SearchPage';
 
 const router = createBrowserRouter([
   // 前台博客路由
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
       { path: 'tag/:id', element: <TagPage /> },
       { path: 'about', element: <About /> },
       { path: 'profile', element: <Profile /> },
+      { path: 'search', element: <SearchPage /> },
     ],
   },
   // 认证路由（登录/注册已改为弹窗形式，重定向到首页）

@@ -149,3 +149,11 @@ a {
   border: none;
   border-top: 1px solid var(--border-color);
 }
+
+/* 搜索关键词高亮 */
+.search-highlight {
+  background: rgba(91, 164, 164, 0.15);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+}
